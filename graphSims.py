@@ -21,7 +21,7 @@ for fileid1 in simsDict.keys():
         sim = filesim[1]
         G.add_edge(fileid1, fileid2, weight=sim)
 
-e1 = [(u, v) for (u, v, d) in G.edges(data=True) if d['weight'] <=0.2]
+e1 = [(u, v) for (u, v, d) in G.edges(data=True) if d['weight'] <= 0.2]
 e2 = [(u, v) for (u, v, d) in G.edges(data=True) if 0.2 < d['weight'] <= 0.4]
 e3 = [(u, v) for (u, v, d) in G.edges(data=True) if 0.4 < d['weight'] <= 0.6]
 e4 = [(u, v) for (u, v, d) in G.edges(data=True) if 0.6 < d['weight'] <= 0.8]
@@ -44,7 +44,7 @@ nx.draw_networkx_labels(G, pos, font_size=10, font_family='sans-serif')
 
 plt.axis('off')
 # plt.savefig("weighted_graph.png") # save as png
-plt.show() # display
+plt.show()  # display
 print "done"
 #nx.draw(g)
 #nx.draw_random(g)

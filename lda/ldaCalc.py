@@ -4,6 +4,8 @@ import gensim
 import os
 import numpy as np
 import operator
+import itertools
+
 try:
    import cPickle as pickle
 except:
@@ -14,6 +16,7 @@ model_file_name = "gensim_lda.model"
 sims_cache_subdir = "sims"
 cos_sims_file_name = "sims.cos"
 hellinger_sims_file_name = "sims.hell"
+
 
 
 
@@ -32,6 +35,9 @@ class LdaCalc:
         self.cos_sims = dict()
         self.hellinger_sims = dict()
         self.top_N = 20
+        self.cos_sim_threshold = 0.98
+        self.hell_sim_threshold = 0.8
+        self.threshold = True
 
     def run_lda(self):
         # get an lda-compatible dictionary
@@ -70,6 +76,13 @@ class LdaCalc:
     def get_sim(self, vec1, vec2):
         return self.get_sim_hellinger(vec1, vec2)
 
+    def get_sims_sorted(self, sims):
+        if self.threshold:
+            sorted_sims = sorted(sims.items(), key=operator.itemgetter(1), reverse=True)
+        else: #  if we're not using threshold, then we're using topN
+            sorted_sims = sorted(sims.items(), key=operator.itemgetter(1), reverse=True)[:self.top_N]
+        return sorted_sims
+
     def calc_sim(self, starting_topic_id):
         #sims = list()
         starting_id = starting_topic_id
@@ -77,21 +90,28 @@ class LdaCalc:
 
         cos_sim = {}
         hell_sim = {}
+        sorted_cos_sim = []
+        sorted_hell_sim = []
         for comp_id in self.bows.keys():
+            if comp_id == starting_id:
+                continue
             #if comp_id != starting_id:
             comp_topics = self.lda_model.get_document_topics(self.bows[comp_id])
             hellsim = self.get_sim_hellinger(starting_topics, comp_topics)
             cossim = self.get_sim_cos(starting_topics, comp_topics)
             #sims.append(sim)
             #print "Comparing " + str(starting_id) + " to " + str(comp_id) + " = " + str(hellsim) + ", " + str(cossim)
-            hell_sim[comp_id] = hellsim
-            cos_sim[comp_id] = cossim
-            sorted_hell_sim = sorted(hell_sim.items(), key=operator.itemgetter(1), reverse=True)[:self.top_N]
+            if (not self.threshold) or self.hell_sim_threshold <= hellsim:
+                hell_sim[comp_id] = hellsim
+            if (not self.threshold) or self.cos_sim_threshold <= cossim:
+                cos_sim[comp_id] = cossim
+            sorted_hell_sim = self.get_sims_sorted(hell_sim)
             sorted_cos_sim = sorted(cos_sim.items(), key=operator.itemgetter(1), reverse=True)[:self.top_N]
         print "\n TOP " + str(self.top_N) + " SIMILAR DOCUMENTS TO " + starting_id
-        for i in range(0, self.top_N):
-            print "hell:" + sorted_hell_sim[i][0] + " = " + str(sorted_hell_sim[i][1])
-            print "cos: " + sorted_cos_sim[i][0] + " = " + str(sorted_cos_sim[i][1]) + "\n"
+        for sim in sorted_hell_sim:
+            print "hell:" + sim[0] + " = " + str(sim[1])
+        for sim in sorted_cos_sim:
+            print "cos: " + sim[0] + " = " + str(sim[1])
         self.cos_sims[starting_topic_id] = sorted_cos_sim
         self.hellinger_sims[starting_topic_id] = sorted_hell_sim
 

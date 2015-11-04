@@ -8,39 +8,42 @@ try:
 except:
    import pickle
 
+threshold = 0.98
 
-pickleFile = os.path.join(os.getcwd(), "cache/sims/sims.hell")
-simsDict = pickle.load(open(pickleFile, "rb"))
+pickleFile = os.path.join(os.getcwd(), "cache/sims/sims.cos")
+simsList = pickle.load(open(pickleFile, "rb"))
 
 G = nx.Graph()
 
 weights = []
-for fileid1 in simsDict.keys():
-    for filesim in simsDict[fileid1]:
-        fileid2 = filesim[0]
-        sim = filesim[1]
+for fileid1, fileid2, sim in simsList:
+    if sim > threshold:
         G.add_edge(fileid1, fileid2, weight=sim)
+    else:
+        break
 
-e1 = [(u, v) for (u, v, d) in G.edges(data=True) if d['weight'] <= 0.2]
-e2 = [(u, v) for (u, v, d) in G.edges(data=True) if 0.2 < d['weight'] <= 0.4]
-e3 = [(u, v) for (u, v, d) in G.edges(data=True) if 0.4 < d['weight'] <= 0.6]
-e4 = [(u, v) for (u, v, d) in G.edges(data=True) if 0.6 < d['weight'] <= 0.8]
-e5 = [(u, v) for (u, v, d) in G.edges(data=True) if 0.8 < d['weight'] <= 1.0]
+# e1 = [(u, v) for (u, v, d) in G.edges(data=True) if d['weight'] <= 0.2]
+# e2 = [(u, v) for (u, v, d) in G.edges(data=True) if 0.2 < d['weight'] <= 0.4]
+# e3 = [(u, v) for (u, v, d) in G.edges(data=True) if 0.4 < d['weight'] <= 0.6]
+# e4 = [(u, v) for (u, v, d) in G.edges(data=True) if 0.6 < d['weight'] <= 0.8]
+# e5 = [(u, v) for (u, v, d) in G.edges(data=True) if 0.8 < d['weight'] <= 1.0]
 
-pos = nx.spring_layout(G, scale=10.0)  # positions for all nodes
+# pos = nx.circular_layout(G, scale=10.0)  # positions for all nodes
+#
+# # nodes
+# nx.draw_networkx_nodes(G, pos)
+#
+# # edges
+# nx.draw_networkx_edges(G, pos, edgelist=e1, width=1)
+# nx.draw_networkx_edges(G, pos, edgelist=e2, width=1)
+# nx.draw_networkx_edges(G, pos, edgelist=e3, width=1)
+# nx.draw_networkx_edges(G, pos, edgelist=e4, width=1)
+# nx.draw_networkx_edges(G, pos, edgelist=e5, width=1)
 
-# nodes
-nx.draw_networkx_nodes(G, pos)
-
-# edges
-nx.draw_networkx_edges(G, pos, edgelist=e1, width=1)
-nx.draw_networkx_edges(G, pos, edgelist=e2, width=2)
-nx.draw_networkx_edges(G, pos, edgelist=e3, width=4)
-nx.draw_networkx_edges(G, pos, edgelist=e4, width=6)
-nx.draw_networkx_edges(G, pos, edgelist=e5, width=10)
+nx.draw_graphviz(G)
 
 
-nx.draw_networkx_labels(G, pos, font_size=10, font_family='sans-serif')
+#nx.draw_networkx_labels(G, pos, font_size=10, font_family='sans-serif')
 
 plt.axis('off')
 # plt.savefig("weighted_graph.png") # save as png

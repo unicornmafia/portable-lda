@@ -24,22 +24,6 @@ lda_model = None
 bow_builder = None
 
 
-def make_bow_vector(terms):
-    word2id = lda_model.lda_model.id2word.token2id
-    bow_vector = list()
-    word_counts = {}
-    for word in terms:
-        if word in word2id.keys():
-            try:
-                word_counts[word] += 1
-            except KeyError:
-                word_counts[word] = 1
-
-    for word in word_counts.keys():
-        bow_vector.append((word, word_counts[word]))
-    return bow_vector
-
-
 @app.route('/')
 def health():
     return 'Lda Server is totally working, you guys!'
@@ -50,6 +34,7 @@ def get_term_sim():
     request_data = request.data
     json_data = json.loads(request_data)
     terms = json_data["terms"]
+    sim_method = json_data["simmethod"]
     print "Terms: " + str(terms)
     if request.method == 'POST':
         pass
@@ -57,7 +42,7 @@ def get_term_sim():
         pass
     vec_bow = lda_model.lda_model.id2word.doc2bow(terms)
     vec_lda = lda_model.lda_model[vec_bow]
-    sims = lda_model.calc_sims_for_topic_distribution(vec_lda)
+    sims = lda_model.calc_sims_for_topic_distribution(vec_lda, sim_method)
     topn = sims[:20]
     topn_json = json.dumps(topn)
     print str(topn_json)

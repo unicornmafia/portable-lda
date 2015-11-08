@@ -66,6 +66,7 @@ class BowBuilder:
             self.id2word[index] = word
             index += 1
 
+
     def make_bow_vectors(self):
         # now build the bow vectors
         for fileid in self.docDicts.keys():

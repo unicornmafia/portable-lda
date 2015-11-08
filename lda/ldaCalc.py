@@ -96,6 +96,19 @@ class LdaCalc:
         self.cos_sims.append((topicid1, topicid2, cossim))
         return hellsim, cossim
 
+    def calc_sims_for_topic_distribution(self, topics):
+        sims = []
+        for topicid in self.bows.keys():
+
+            topics2 = self.lda_model.get_document_topics(self.bows[topicid])
+
+            cossim = self.get_sim_cos(topics, topics2)
+            hellsim = self.get_sim_hellinger(topics, topics2)
+
+            sims.append((topicid, cossim, hellsim))
+        sorted_sims = sorted(sims, key=lambda x: x[1], reverse=True)
+        return sorted_sims
+
     def calc_sims(self):
         i = 0
 

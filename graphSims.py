@@ -40,7 +40,7 @@ for fileid1, fileid2, sim in simsList:
 # nx.draw_networkx_edges(G, pos, edgelist=e4, width=1)
 # nx.draw_networkx_edges(G, pos, edgelist=e5, width=1)
 
-nx.draw_graphviz(G)
+nx.draw_networkx(G)
 
 
 #nx.draw_networkx_labels(G, pos, font_size=10, font_family='sans-serif')

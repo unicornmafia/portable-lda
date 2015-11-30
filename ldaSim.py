@@ -17,7 +17,7 @@ lda.load()
 lda.print_topics()
 
 lda.calc_sims()
-lda.save_sims()
+# lda.save_sims()
 
 
 

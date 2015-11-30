@@ -122,8 +122,7 @@ class LdaCalc:
             sims = self.calc_sim(fileid1, fileid2)
             print "(%d of %d) comparing %s and %s: hell=%f, cos=%f" \
                   % (i, num_combos, fileid1, fileid2, sims[0], sims[1])
-            #if i == 100:
-            #    break
+
         self.hell_sims = self.get_sims_sorted(self.hell_sims)
         self.cos_sims = self.get_sims_sorted(self.cos_sims)
 

@@ -3,10 +3,9 @@ __author__ = 'thomas'
 import gensim
 import os
 import numpy as np
-import operator
 import itertools
 import scipy.misc
-
+from scipy import spatial
 
 try:
    import cPickle as pickle
@@ -63,18 +62,14 @@ class LdaCalc:
         print "loaded"
 
     def get_sim_cos(self, vec1, vec2):
-        sim = gensim.matutils.cossim(vec1, vec2)
+        #sim = gensim.matutils.cossim(vec1, vec2) <-- note:  this requires sparse arrays
+        sim = 1 - spatial.distance.cosine(vec1, vec2)
         return sim
 
     def get_sim_hellinger(self, vec1, vec2):
         #Hellinger distance is useful for similarity between probability distributions (such as LDA topics):
-        dense1 = gensim.matutils.sparse2full(vec1, self.num_topics)
-        dense2 = gensim.matutils.sparse2full(vec2, self.num_topics)
-        sim = 1.0 - np.sqrt(0.5 * ((np.sqrt(dense1) - np.sqrt(dense2))**2).sum())
+        sim = 1.0 - np.sqrt(0.5 * ((np.sqrt(vec1) - np.sqrt(vec2))**2).sum())
         return sim
-
-    def get_sim(self, vec1, vec2):
-        return self.get_sim_hellinger(vec1, vec2)
 
     def get_sims_sorted(self, sims):
         sorted_sims = sorted(sims, key=lambda tup: tup[2], reverse=True)
@@ -96,17 +91,18 @@ class LdaCalc:
         self.cos_sims.append((topicid1, topicid2, cossim))
         return hellsim, cossim
 
-    def calc_sims_for_topic_distribution(self, topics, sim_method="Cosine"):
+    def calc_sims_for_topic_distribution(self, topic_distribution, sim_method="Cosine"):
         sims = []
         for topicid in self.bows.keys():
 
-            topics2 = self.lda_model.get_document_topics(self.bows[topicid])
+            topics_sparse = self.lda_model.get_document_topics(self.bows[topicid])
+            topics_full = gensim.matutils.sparse2full(topics_sparse, self.lda_model.num_topics)
 
             if sim_method == "Cosine":
-                sim = self.get_sim_cos(topics, topics2)
+                sim = self.get_sim_cos(topic_distribution, topics_full)
                 sims.append((topicid, sim))
             else:
-                sim = self.get_sim_hellinger(topics, topics2)
+                sim = self.get_sim_hellinger(topic_distribution, topics_full)
                 sims.append((topicid, sim))
 
         sorted_sims = sorted(sims, key=lambda x: x[1], reverse=True)

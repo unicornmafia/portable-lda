@@ -37,20 +37,20 @@ class DynamicLda:
         return summed_dist
 
     def get_biased_topic_distribution(self, query_terms, good_docs, bad_docs, good_terms, bad_terms):
-
+        # get the bias based on concept
         bias = self.get_topic_bias(good_docs, bad_docs)
+
+        # make the query terms into a bow and get the topic distribution from the model for that bow
         vec_bow = self.lda_model.id2word.doc2bow(query_terms)
-        vec_topic_distribution = self.lda_model[vec_bow]
-        biased_topic_distribution = np.zeros(len(vec_topic_distribution))
-        for topicTuple in vec_topic_distribution:
-            index = topicTuple[0]
-            probability = topicTuple[1]
-            biased_probability = probability + bias[index]
-            biased_topic_distribution[index] = biased_probability
+        vec_topic_distribution = gensim.matutils.sparse2full(self.lda_model[vec_bow], self.lda_model.num_topics)
+
+        # add bias to topic distribution
+        biased_topic_distribution = vec_topic_distribution + bias
+
+        # remove negative values and renormalize
         biased_topic_distribution[biased_topic_distribution < 0] = 0
-        # renormalize:
         biased_topic_distribution /= sum(biased_topic_distribution)
-        return vec_topic_distribution
+        return biased_topic_distribution
 
 
 

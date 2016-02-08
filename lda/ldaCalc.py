@@ -12,27 +12,24 @@ try:
 except:
    import pickle
 
-cache_subdir = "model"
-model_file_name = "gensim_lda.model"
-sims_cache_subdir = "sims"
+cache_subdir = ""
+model_file_name = "lda_model"
 cos_sims_file_name = "sims.cos"
 hellinger_sims_file_name = "sims.hell"
 
 
-
-
 class LdaCalc:
-    def __init__(self, bows=None, id2word=None, cache_dir="", hell_threshold=0.98, cos_threshold=0.8):
+    def __init__(self, bows=None, id2word=None, lda_cache_dir="", sims_cache_dir="", hell_threshold=0.98, cos_threshold=0.8, num_topics=20):
         self.bows = bows  # {fileid:bowvector}
         self.bow_vector_list = bows.values()
         self.id2word = id2word
-        self.cache_dir = os.path.join(cache_dir, cache_subdir)
-        self.model_file_name = os.path.join(self.cache_dir, model_file_name)
-        self.sims_cache_dir = os.path.join(cache_dir, sims_cache_subdir)
+        self.cache_dir = sims_cache_dir
+        self.model_file_name = os.path.join(lda_cache_dir, model_file_name)
+        self.sims_cache_dir = sims_cache_dir
         self.cos_sims_file_name = os.path.join(self.sims_cache_dir, cos_sims_file_name)
         self.hell_sims_file_name = os.path.join(self.sims_cache_dir, hellinger_sims_file_name)
         self.lda_model = None
-        self.num_topics = 20
+        self.num_topics = num_topics
         self.cos_sims = list()
         self.hell_sims = list()
         self.cos_sim_threshold = cos_threshold
@@ -94,7 +91,7 @@ class LdaCalc:
     def calc_sims_for_topic_distribution(self, topic_distribution, sim_method="Cosine"):
         sims = []
         for topicid in self.bows.keys():
-
+            print("Sims")
             topics_sparse = self.lda_model.get_document_topics(self.bows[topicid])
             topics_full = gensim.matutils.sparse2full(topics_sparse, self.lda_model.num_topics)
 

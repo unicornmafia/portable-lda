@@ -14,14 +14,22 @@ from lda.dynamicLda import DynamicLda
 from datetime import timedelta
 from flask import make_response, request, current_app
 from functools import update_wrapper
+from reuters.vocabulary import Vocabulary
+from reuters.text import Text
+
+sims_cache_path = "/home/thomas/projects/clms/internship/lda/cache/sims"
+reuters_cache_path = "/home/thomas/projects/clms/internship/lda/cache/reuters"
+reuters_path = "/home/thomas/Downloads/corpora/reuters/"
+vocab_file = os.path.join(reuters_path, "stem.termid.idf.map.txt")
+text_file = os.path.join(reuters_path, "lyrl2004_tokens_train.dat")
 
 N = 20   # num of sims to return'
 app = Flask(__name__)
 CORS(app)
 counter = 0
-bow_vectors = None
 lda_model = None
-bow_builder = None
+vocab = None
+text_corpus = None
 cache_root = ""
 
 
@@ -44,15 +52,16 @@ def read_file(fileid):
     filepath = os.path.join(cache_root, "plaintext", fileid)
     try:
         with open(filepath, "r") as datafile:
-            data=datafile.read()
+            data = datafile.read()
         return data
     except:
         return "Error Reading File: " + filepath
 
 
-@app.route('/document/<docid>', methods=['GET'])
-def get_document(docid):
-    return read_file(docid)
+@app.route('/document/<doc_id>', methods=['GET'])
+def get_document(doc_id):
+    #  return read_file(doc_id)
+    return " ".join(text_corpus.text_vectors[doc_id])
 
 
 @app.route('/get-term-sim', methods=['POST'])
@@ -111,18 +120,19 @@ def get_sims_from_concept():
     return json_list
 
 if __name__ == '__main__':
-    global cache_root
     print "Loading BoW Vectors from cache...\n"
-    cache_root = os.path.join(os.getcwd(), "cache")
-    bow_builder = BowBuilder(cache_dir=cache_root)
-    bow_builder.load()
-    bow_vectors = bow_builder.bowVectorCorpus
+    vocab = Vocabulary(vocab_file)
+    vocab.load_from_cache(reuters_cache_path)
+    text_corpus = Text(text_file, vocab)
+    text_corpus.load_from_cache(reuters_cache_path)
 
     print "Loading LDA model...\n"
-    lda_model = LdaCalc(bows=bow_vectors, cache_dir=cache_root)
+    lda_model = LdaCalc(bows=text_corpus.bow_vectors,
+                        sims_cache_dir=sims_cache_path,
+                        lda_cache_dir=reuters_cache_path,
+                        num_topics=100)
     lda_model.load()
     lda_model.print_topics()
 
     print "\nStarting Server..."
-    app.debug = True
-    app.run(host="0.0.0.0", port=1338)
+    app.run(host="0.0.0.0", port=1338, debug=True, use_reloader=False)

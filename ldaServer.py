@@ -31,6 +31,7 @@ lda_model = None
 vocab = None
 text_corpus = None
 cache_root = ""
+num_topics = 30
 
 
 @app.route('/')
@@ -130,7 +131,7 @@ if __name__ == '__main__':
     lda_model = LdaCalc(bows=text_corpus.bow_vectors,
                         sims_cache_dir=sims_cache_path,
                         lda_cache_dir=reuters_cache_path,
-                        num_topics=100)
+                        num_topics=num_topics)
     lda_model.load()
     lda_model.print_topics()
 

@@ -24,7 +24,7 @@ text.load_from_text()
 print("Saving Corpus to Cache...")
 text.save_to_cache(reuters_cache_path)
 
-num_topics = 100
+num_topics = 30
 
 print("Making Dictionary from Corpus (" + str(len(text.bow_vectors)) + " documents)...")
 # get an lda-compatible dictionary

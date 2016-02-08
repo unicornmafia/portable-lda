@@ -91,7 +91,6 @@ class LdaCalc:
     def calc_sims_for_topic_distribution(self, topic_distribution, sim_method="Cosine"):
         sims = []
         for topicid in self.bows.keys():
-            print("Sims")
             topics_sparse = self.lda_model.get_document_topics(self.bows[topicid])
             topics_full = gensim.matutils.sparse2full(topics_sparse, self.lda_model.num_topics)
 

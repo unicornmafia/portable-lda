@@ -2,10 +2,8 @@ __author__ = 'thomas'
 
 from nltk.corpus import stopwords
 import os
-try:
-   import cPickle as pickle
-except:
-   import pickle
+
+import pickle
 
 cache_subdir = "bow"
 pickle_file_name = "bow_vectors"

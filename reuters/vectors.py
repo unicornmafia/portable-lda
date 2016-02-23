@@ -1,9 +1,6 @@
 __author__ = 'thomas'
 import os
-try:
-   import cPickle as pickle
-except:
-   import pickle
+import pickle
 
 
 class Vectors:

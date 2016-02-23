@@ -4,9 +4,10 @@ import gensim
 from reuters.vocabulary import Vocabulary
 from reuters.text import Text
 from reuters.vectors import Vectors
+from gensim.similarities import SparseMatrixSimilarity
 
 reuters_cache_path = "/home/thomas/projects/clms/internship/lda/cache/reuters"
-reuters_path = "/home/thomas/Downloads/corpora/reuters/"
+reuters_path = "/home/thomas/projects/clms/internship/corpora/reuters/"
 vocab_file = os.path.join(reuters_path, "stem.termid.idf.map.txt")
 text_file = os.path.join(reuters_path, "lyrl2004_tokens_train.dat")
 vector_file = os.path.join(reuters_path, "lyrl2004_vectors_train.dat")
@@ -24,7 +25,7 @@ text.load_from_text()
 print("Saving Corpus to Cache...")
 text.save_to_cache(reuters_cache_path)
 
-num_topics = 30
+num_topics = 100
 
 print("Making Dictionary from Corpus (" + str(len(text.bow_vectors)) + " documents)...")
 # get an lda-compatible dictionary

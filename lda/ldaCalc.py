@@ -7,10 +7,7 @@ import itertools
 import scipy.misc
 from scipy import spatial
 
-try:
-   import cPickle as pickle
-except:
-   import pickle
+import pickle
 
 cache_subdir = ""
 model_file_name = "lda_model"
@@ -19,7 +16,7 @@ hellinger_sims_file_name = "sims.hell"
 
 
 class LdaCalc:
-    def __init__(self, bows=None, id2word=None, lda_cache_dir="", sims_cache_dir="", hell_threshold=0.98, cos_threshold=0.8, num_topics=20):
+    def __init__(self, bows=None, id2word=None, lda_cache_dir="", sims_cache_dir="", hell_threshold=0.98, cos_threshold=0.8, num_topics=100):
         self.bows = bows  # {fileid:bowvector}
         self.bow_vector_list = bows.values()
         self.id2word = id2word
@@ -43,20 +40,20 @@ class LdaCalc:
         self.lda_model = gensim.models.ldamodel.LdaModel(corpus=self.bow_vector_list, id2word=dictionary,
                                                          num_topics=self.num_topics, update_every=1,
                                                          chunksize=10000, passes=1)
-        print "done running the lda"
+        print("done running the lda")
 
     def print_topics(self):
         # print that shit!
         topics = self.lda_model.print_topics(num_topics=self.num_topics, num_words=20)
         for topic in topics:
-            print topic
+            print(topic)
 
     def save(self):
         self.lda_model .save(self.model_file_name)
 
     def load(self):
         self.lda_model = gensim.models.LdaModel.load(self.model_file_name)
-        print "loaded"
+        print("loaded")
 
     def get_sim_cos(self, vec1, vec2):
         #sim = gensim.matutils.cossim(vec1, vec2) <-- note:  this requires sparse arrays
@@ -67,6 +64,10 @@ class LdaCalc:
         #Hellinger distance is useful for similarity between probability distributions (such as LDA topics):
         sim = 1.0 - np.sqrt(0.5 * ((np.sqrt(vec1) - np.sqrt(vec2))**2).sum())
         return sim
+
+    def get_sim_euclidean(self, vec1, vec2):
+        euclidean = spatial.distance.euclidean(vec1, vec2)
+        return euclidean
 
     def get_sims_sorted(self, sims):
         sorted_sims = sorted(sims, key=lambda tup: tup[2], reverse=True)
@@ -97,23 +98,30 @@ class LdaCalc:
             if sim_method == "Cosine":
                 sim = self.get_sim_cos(topic_distribution, topics_full)
                 sims.append((topicid, sim))
-            else:
+            elif sim_method == "Euclidean":
+                # for euclidean, lower numbers are better
+                sim = self.get_sim_euclidean(topic_distribution, topics_full)
+                sims.append((topicid, sim))
+            else:  # hellinger
                 sim = self.get_sim_hellinger(topic_distribution, topics_full)
                 sims.append((topicid, sim))
 
-        sorted_sims = sorted(sims, key=lambda x: x[1], reverse=True)
+        if sim_method != "Euclidean":
+            sorted_sims = sorted(sims, key=lambda x: x[1], reverse=True)
+        else:  # if it's euclidean, the lowest numbers are the best ones.
+            sorted_sims = sorted(sims, key=lambda x: x[1], reverse=False)
         return sorted_sims
 
     def calc_sims(self):
         i = 0
 
         num_combos = scipy.misc.comb(len(self.bows.keys()), 2)
-        print "########################################################################################\n"
+        print("########################################################################################\n")
         for fileid1, fileid2 in itertools.combinations(self.bows.keys(), 2):
             i += 1
             sims = self.calc_sim(fileid1, fileid2)
-            print "(%d of %d) comparing %s and %s: hell=%f, cos=%f" \
-                  % (i, num_combos, fileid1, fileid2, sims[0], sims[1])
+            print("(%d of %d) comparing %s and %s: hell=%f, cos=%f" \
+                  % (i, num_combos, fileid1, fileid2, sims[0], sims[1]))
 
         self.hell_sims = self.get_sims_sorted(self.hell_sims)
         self.cos_sims = self.get_sims_sorted(self.cos_sims)

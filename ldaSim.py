@@ -11,7 +11,7 @@ bowBuilder = BowBuilder(cache_dir=cache_root)
 bowBuilder.load()
 bows = bowBuilder.bowVectorCorpus
 
-print "\nLoading LDA model -----------------------------------------------\n"
+print("\nLoading LDA model -----------------------------------------------\n")
 lda = LdaCalc(bows=bows, sims_cache_dir=cache_root)
 lda.load()
 lda.print_topics()

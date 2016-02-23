@@ -2,10 +2,7 @@ __author__ = 'thomas'
 
 import os
 import matplotlib.pyplot as plt
-try:
-   import cPickle as pickle
-except:
-   import pickle
+import pickle
 
 thresholdMin = 0.0
 thresholdMax = 1.0
@@ -24,7 +21,7 @@ cosInfoArray = []
 hellInfoArray = []
 thresholdArray = [x * 0.01 for x in range(0, 101)]
 for threshold in thresholdArray:
-    print "calculating info for threshold = " + str(threshold)
+    print("calculating info for threshold = " + str(threshold))
     numCosEdges = 0
     numHellEdges = 0
     for fileid1, fileid2, cosSim in cosSimsList:
@@ -53,4 +50,4 @@ plt.title('Connectivity')
 fig = plt.gcf()
 fig.canvas.set_window_title('Connectivity')
 plt.show()
-print "done"
+print("done")

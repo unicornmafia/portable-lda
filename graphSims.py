@@ -3,10 +3,8 @@ __author__ = 'thomas'
 import os
 import networkx as nx
 import matplotlib.pyplot as plt
-try:
-   import cPickle as pickle
-except:
-   import pickle
+
+import pickle
 
 threshold = 0.98
 
@@ -48,7 +46,7 @@ nx.draw_networkx(G)
 plt.axis('off')
 # plt.savefig("weighted_graph.png") # save as png
 plt.show()  # display
-print "done"
+print("done")
 #nx.draw(g)
 #nx.draw_random(g)
 #nx.draw_circular(g)

@@ -57,7 +57,7 @@ class LdaCalc:
 
     def get_sim_cos(self, vec1, vec2):
         #sim = gensim.matutils.cossim(vec1, vec2) <-- note:  this requires sparse arrays
-        sim = 1 - spatial.distance.cosine(vec1, vec2)
+        sim = 1.0 - spatial.distance.cosine(vec1, vec2)
         return sim
 
     def get_sim_hellinger(self, vec1, vec2):
@@ -91,6 +91,8 @@ class LdaCalc:
 
     def calc_sims_for_topic_distribution(self, topic_distribution, sim_method="Cosine"):
         sims = []
+        debug_i = 0
+        debug_max = 0  # set to 0 for no debugging
         for topicid in self.bows.keys():
             topics_sparse = self.lda_model.get_document_topics(self.bows[topicid])
             topics_full = gensim.matutils.sparse2full(topics_sparse, self.lda_model.num_topics)
@@ -105,6 +107,9 @@ class LdaCalc:
             else:  # hellinger
                 sim = self.get_sim_hellinger(topic_distribution, topics_full)
                 sims.append((topicid, sim))
+            debug_i += 1
+            if debug_max != 0 and debug_i > debug_max:
+                break
 
         if sim_method != "Euclidean":
             sorted_sims = sorted(sims, key=lambda x: x[1], reverse=True)

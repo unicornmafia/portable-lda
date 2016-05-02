@@ -29,9 +29,10 @@ class DynamicLda:
 
     def get_topic_bias(self, good_docs, bad_docs):
         good_dist = self.get_topic_distributions(good_docs)
+        summed_good_dist = good_dist.sum(axis=0)
         bad_dist = self.get_topic_distributions(bad_docs)*(-1)
-        total_dist = good_dist + bad_dist
-        summed_dist = total_dist.sum(axis=0)  # sum over the columns
+        summed_bad_dist = bad_dist.sum(axis=0)
+        summed_dist = summed_good_dist + summed_bad_dist
         summed_dist[summed_dist > 0] = self.topic_threshold
         summed_dist[summed_dist < 0] = -self.topic_threshold
         return summed_dist

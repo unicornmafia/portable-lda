@@ -1,7 +1,6 @@
 __author__ = 'thomas'
 
 from flask import Flask
-
 import codecs
 from flask import request
 import os
@@ -19,6 +18,7 @@ from reuters.vocabulary import Vocabulary
 from reuters.text import Text
 from reuters.reuters_indexer import ReutersIndex
 from reuters.reuters_article_parser import ReutersArticle
+import urllib
 
 
 sims_cache_path = "/home/thomas/projects/clms/internship/lda/cache/sims"
@@ -46,12 +46,22 @@ def health():
     return 'Lda Server is totally working, you guys!'
 
 
+def get_title_from_id(file_id):
+    file_path = reuters_index.index[int(file_id)]
+    reuters_article = ReutersArticle(file_path)
+    title = urllib.parse.quote(reuters_article.get_title())
+    return title
+    
+
 def build_json_list(topn):
     retstr = '['
     for i in range(0, N):
+        file_id = topn[i][0]
+        sim = topn[i][1]
         if i != 0:
             retstr += ","
-        retstr += '{"id":%d, "name":"%s", "sim": %f}' % (i, topn[i][0], topn[i][1])
+        retstr += '{"id":%d, "fileid": "%s", "name":"%s", "sim": %f}' % (i, file_id, get_title_from_id(file_id), sim)
+
     retstr += ']'
     return retstr
 
@@ -97,7 +107,7 @@ def get_term_sim():
 def get_id_list(json_array):
     ids = []
     for item in json_array:
-        ids.append(item["name"])
+        ids.append(item["fileid"])
     return ids
 
 
@@ -143,14 +153,14 @@ if __name__ == '__main__':
     lda_model.load()
     lda_model.print_topics()
 
-    print("Indexing Model for similarities...")
-    index = gensim.similarities.MatrixSimilarity(lda_model.lda_model[text_corpus.bow_vectors])
-    doc = "Fear of contracting AIDS from women is prompting some men to turn to children for sex, the head of the United Nations' global AIDS agency told a conference on child sex abuse on Wednesday. \"The AIDS epidemic has become both a cause and a consequence of the trade in children,\" Peter Piot, executive director of UNAIDS, said in a speech. \"Men are looking out for younger girls because they are concerned that if they have sex with adult women then they are at risk for HIV infection,\" Piot told Reuters. Sex with younger partners as protection from HIV, the virus that causes AIDS, is an illusion, Piot told delegates from more than 100 countries on the second day of the first World Congress Against Commercial Sexual Exploitation of Children. Many child prostitutes were infected and young people are actually more susceptible to infection than adults, Piot said. \"Because of the physical disproportion between the partners, a child who is not fully grown is more easily torn or damaged by penetrative sex, and this makes it easier for the virus to pass into the child's body,\" Piot said in a speech at the conference. \"And a child can't fight back, no matter how rough the sex or how long it lasts,\" Piot added. Over 1,000 delegates have gathered in Stockholm for the five-day conference to discuss the scope of the problems, legal reform, and raising public awareness. More than one million children worldwide are reportedly forced into child prostitution, trafficked and sold for sexual purposes and used in the production of child pornography, according to UNICEF figures. About one million children are currently HIV positive or have AIDS. Most contracted the disease from their infected mothers, Piot said. Over two million children had already died from the disease, he said. Statistics showing the rate of HIV infection among child prostitutes were unavailable, but Piot said that very small samples indicated that as many as 50 percent of underage sex workers could have the virus. The conference is jointly organised by the Swedish government, the United Nations Childrens Fund (UNICEF), pressure group ECPAT (End Child Prostitution in Asia Tourism) and the NGO group on the rights of the child. While promoting condom use could curb the spread of the HIV virus among underage sex workers, Piot called for broader, urgent measures from governments and communities to end the sexual trade in children. \"Children are weak, vulnerable and uninformed, and they are scarcely in a position to demand that the client should use a condom,\" Piot said. \"Through income-generation, promotion of rural industry and education policies, governments can reinforce families' resistance to the lure of commercial gain through the sale of their children,\" Piot said as one example. Since the start of the conference, as if to underline how widespread the issue is, horrifying abuse and paedophile cases have come to light in Albania, Australia, Belgium and Finland. Finnish police said on Wednesday they had discovered in a Helsinki flat a massive computer library of exceptionally severe child pornography including pictures of mutilated people and cannibalism. Police had taken two computers and nearly 350 floppy disks from the home of a 19-year-old student, but could not arrest him because they do not have the powers under Finnish law. In Belgium police on Wednesday were digging for human remains at a property owned by Marc Dutroux, chief suspect in a child sex and kidnapping ring. Dutroux had already led police to the bodies of eight-year-olds Melissa Russo and Julie Lejeune and of Weinstein 10 days ago. They were buried in the garden of one of Dutroux' five other houses in and around the city of Charleroi. Also this week, a 75-year-old Australian man appeared in court charged with 850 child sex crimes, including indecent dealing, sodomy and permitting sodomy with children."
-    vec_bow = lda_model.id2word.doc2bow(doc.lower().split())
-    vec_lda = lda_model.lda_model[vec_bow]
-    sims = index[vec_lda]
-    sims = sorted(enumerate(sims), key=lambda item: -item[1])
-    print(sims)
+    #print("Indexing Model for similarities...")
+    #index = gensim.similarities.MatrixSimilarity(lda_model.lda_model[text_corpus.bow_vectors])
+    #doc = "Fear of contracting AIDS from women is prompting some men to turn to children for sex, the head of the United Nations' global AIDS agency told a conference on child sex abuse on Wednesday. \"The AIDS epidemic has become both a cause and a consequence of the trade in children,\" Peter Piot, executive director of UNAIDS, said in a speech. \"Men are looking out for younger girls because they are concerned that if they have sex with adult women then they are at risk for HIV infection,\" Piot told Reuters. Sex with younger partners as protection from HIV, the virus that causes AIDS, is an illusion, Piot told delegates from more than 100 countries on the second day of the first World Congress Against Commercial Sexual Exploitation of Children. Many child prostitutes were infected and young people are actually more susceptible to infection than adults, Piot said. \"Because of the physical disproportion between the partners, a child who is not fully grown is more easily torn or damaged by penetrative sex, and this makes it easier for the virus to pass into the child's body,\" Piot said in a speech at the conference. \"And a child can't fight back, no matter how rough the sex or how long it lasts,\" Piot added. Over 1,000 delegates have gathered in Stockholm for the five-day conference to discuss the scope of the problems, legal reform, and raising public awareness. More than one million children worldwide are reportedly forced into child prostitution, trafficked and sold for sexual purposes and used in the production of child pornography, according to UNICEF figures. About one million children are currently HIV positive or have AIDS. Most contracted the disease from their infected mothers, Piot said. Over two million children had already died from the disease, he said. Statistics showing the rate of HIV infection among child prostitutes were unavailable, but Piot said that very small samples indicated that as many as 50 percent of underage sex workers could have the virus. The conference is jointly organised by the Swedish government, the United Nations Childrens Fund (UNICEF), pressure group ECPAT (End Child Prostitution in Asia Tourism) and the NGO group on the rights of the child. While promoting condom use could curb the spread of the HIV virus among underage sex workers, Piot called for broader, urgent measures from governments and communities to end the sexual trade in children. \"Children are weak, vulnerable and uninformed, and they are scarcely in a position to demand that the client should use a condom,\" Piot said. \"Through income-generation, promotion of rural industry and education policies, governments can reinforce families' resistance to the lure of commercial gain through the sale of their children,\" Piot said as one example. Since the start of the conference, as if to underline how widespread the issue is, horrifying abuse and paedophile cases have come to light in Albania, Australia, Belgium and Finland. Finnish police said on Wednesday they had discovered in a Helsinki flat a massive computer library of exceptionally severe child pornography including pictures of mutilated people and cannibalism. Police had taken two computers and nearly 350 floppy disks from the home of a 19-year-old student, but could not arrest him because they do not have the powers under Finnish law. In Belgium police on Wednesday were digging for human remains at a property owned by Marc Dutroux, chief suspect in a child sex and kidnapping ring. Dutroux had already led police to the bodies of eight-year-olds Melissa Russo and Julie Lejeune and of Weinstein 10 days ago. They were buried in the garden of one of Dutroux' five other houses in and around the city of Charleroi. Also this week, a 75-year-old Australian man appeared in court charged with 850 child sex crimes, including indecent dealing, sodomy and permitting sodomy with children."
+    #vec_bow = lda_model.id2word.doc2bow(doc.lower().split())
+    #vec_lda = lda_model.lda_model[vec_bow]
+    #sims = index[vec_lda]
+    #sims = sorted(enumerate(sims), key=lambda item: -item[1])
+    #print(sims)
 
     print("\nStarting Server...")
     app.run(host="0.0.0.0", port=1338, debug=True, use_reloader=False, threaded=True)
